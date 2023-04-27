@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Edmond Géraud">
+
+<title>Regularización y selección de características</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="Regularizacion_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Regularizacion_files/libs/quarto-html/quarto.js"></script>
+<script src="Regularizacion_files/libs/quarto-html/popper.min.js"></script>
+<script src="Regularizacion_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Regularizacion_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Regularizacion_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Regularizacion_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Regularizacion_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Regularizacion_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Regularizacion_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Regularización y selección de características</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Edmond Géraud </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="selección-de-características" class="level1">
+<h1>Selección de características</h1>
+<p>La selección de características es una técnica utilizada en aprendizaje automático para seleccionar un subconjunto de características relevantes y útiles para la tarea de predicción, con el objetivo de mejorar el rendimiento del modelo y reducir el riesgo de sobreajuste. En otras palabras, la selección de características se refiere al proceso de elegir un conjunto óptimo de características (variables o atributos) para el modelo predictivo, eliminando las características redundantes o irrelevantes que pueden afectar negativamente el rendimiento del modelo.</p>
+<section id="selección-de-modelos-por-aic" class="level2">
+<h2 class="anchored" data-anchor-id="selección-de-modelos-por-aic">Selección de modelos por AIC</h2>
+<p>El criterio de información de Akaike (AIC) es un método para seleccionar modelos estadísticos entre un conjunto de modelos candidatos. Fue propuesto por el estadístico japonés Hirotugu Akaike en 1974.</p>
+<p>El principio subyacente del AIC es que se prefiere un modelo que tenga un buen ajuste a los datos, pero que tenga un número mínimo de parámetros. El AIC combina estas dos medidas al considerar tanto la bondad de ajuste del modelo como el número de parámetros del modelo.</p>
+<p>El AIC se define como la suma del error cuadrático (o alguna otra medida de error) del modelo y el producto del número de parámetros del modelo y una constante que depende del número de observaciones. El modelo con el valor más bajo del AIC se considera el mejor modelo de entre los modelos candidatos.</p>
+<p>El AIC se basa en la idea de que el modelo más probable es aquel que minimiza la información perdida al modelar los datos, es decir, que tiene el equilibrio óptimo entre el ajuste y la complejidad del modelo. El término de penalización del número de parámetros en el AIC evita que el modelo se sobreajuste a los datos y selecciona el modelo más simple posible que aún pueda explicar los datos de manera efectiva.</p>
+<p>En resumen, el principio subyacente del AIC es encontrar un modelo que tenga un buen ajuste a los datos, pero que tenga un número mínimo de parámetros. El AIC se basa en la idea de que el modelo más probable es aquel que minimiza la información perdida al modelar los datos, y utiliza una medida combinada de la bondad de ajuste y la complejidad del modelo para seleccionar el mejor modelo de entre los modelos candidatos.</p>
+<p><span class="math display">\[
+AIC=2k-2ln(L)
+\]</span></p>
+<p>Donde <span class="math inline">\(k\)</span> es el número de parámetros en el modelo y <span class="math inline">\(L\)</span> es la función de verosimilitud máxima del modelo estimada a partir de los datos.</p>
+<p>El AIC se calcula como la suma de dos términos: el primer término, 2k, es una penalización por el número de parámetros en el modelo, mientras que el segundo término, <span class="math inline">\(-2ln(L)\)</span>, es proporcional al negativo del logaritmo de la función de verosimilitud máxima del modelo. El modelo con el valor más bajo del AIC se considera el mejor modelo de entre los modelos candidatos.</p>
+</section>
+<section id="métodos-por-reducción-de-dimensionalidad" class="level2">
+<h2 class="anchored" data-anchor-id="métodos-por-reducción-de-dimensionalidad">Métodos por reducción de dimensionalidad</h2>
+<section id="pca-pcr" class="level3">
+<h3 class="anchored" data-anchor-id="pca-pcr">PCA-PCR</h3>
+<p>El PCA (Principal Component Analysis) es una técnica estadística utilizada para reducir la dimensionalidad de los datos. El objetivo del PCA es encontrar una combinación lineal de variables predictoras (conocidas como componentes principales) que expliquen la mayor cantidad posible de la variación en los datos.</p>
+<p>En el PCA, se asume que la variación en los datos se debe a una combinación de variables predictoras y no a variables aleatorias. Por lo tanto, el PCA busca identificar las variables predictoras que contribuyen más a la variación en los datos y combinarlas para formar nuevas variables o componentes principales.</p>
+<p>La primera componente principal se elige de tal manera que tenga la mayor varianza posible, lo que significa que esta componente principal explica la mayor cantidad posible de la variación en los datos. Las componentes siguientes se eligen de tal manera que estén altamente correlacionadas con las variables predictoras originales, pero no estén correlacionadas con las componentes principales previamente seleccionadas.</p>
+<p>Una vez que se han identificado las componentes principales, se pueden utilizar para reducir la dimensionalidad de los datos al proyectar los datos originales sobre las componentes principales seleccionadas. Esto se puede hacer eliminando las componentes principales que contribuyen menos a la variación en los datos y conservando solo las componentes principales más importantes.</p>
+<p>El PCA se utiliza comúnmente en la exploración de datos y el análisis multivariado, particularmente en los casos en que hay muchas variables predictoras. También se utiliza en la clasificación y la agrupación de datos y en la visualización de datos en dos o tres dimensiones.</p>
+<p>En resumen, el PCA es una técnica estadística utilizada para reducir la dimensionalidad de los datos. El PCA busca identificar las variables predictoras que contribuyen más a la variación en los datos y combinarlas para formar nuevas variables o componentes principales. Las componentes principales se pueden utilizar para reducir la dimensionalidad de los datos proyectando los datos originales sobre las componentes principales seleccionadas.</p>
+<p>El PCR (Principal Component Regression) es un método de regresión que utiliza el PCA para reducir la dimensionalidad de los datos y luego realiza la regresión sobre las componentes principales seleccionadas. En lugar de utilizar todas las variables predictoras originales en la regresión, el PCR utiliza una combinación lineal de las componentes principales seleccionadas que mejor explique la variabilidad en la variable respuesta.</p>
+<p>En el PCR, se realizan tres pasos principales. En primer lugar, se realiza el PCA sobre las variables predictoras para identificar las componentes principales que explican la mayor cantidad de variación en los datos. En segundo lugar, se seleccionan un número limitado de componentes principales que se utilizarán en la regresión. En tercer lugar, se realiza la regresión utilizando las componentes principales seleccionadas.</p>
+<p>El objetivo del PCR es reducir la dimensionalidad de los datos para evitar el sobreajuste del modelo y mejorar la precisión de la regresión. El PCR se utiliza comúnmente en la regresión cuando hay muchas variables predictoras y es difícil identificar cuáles son las variables más importantes.</p>
+<p>El PCR tiene algunas ventajas en comparación con otros métodos de regresión, como la regresión lineal múltiple. En particular, el PCR puede ser útil cuando hay una alta correlación entre las variables predictoras, lo que puede causar problemas en la regresión lineal múltiple. Además, el PCR puede mejorar la estabilidad de la regresión al reducir la dimensionalidad de los datos.</p>
+<p>En resumen, el PCR es un método de regresión que utiliza el PCA para reducir la dimensionalidad de los datos y luego realiza la regresión sobre las componentes principales seleccionadas. El PCR se utiliza comúnmente en la regresión</p>
+<p>Stop generating</p>
+</section>
+<section id="pls" class="level3">
+<h3 class="anchored" data-anchor-id="pls">PLS</h3>
+<p>El PLS (Partial Least Squares) es un método estadístico de regresión que busca establecer una relación lineal entre un conjunto de variables predictoras y una variable respuesta. El objetivo de PLS es encontrar una representación reducida de las variables predictoras, llamadas componentes latentes, que expliquen la mayor cantidad posible de variación en la variable respuesta.</p>
+<p>La idea principal del PLS es encontrar una combinación lineal de las variables predictoras que explique la mayor parte de la variación en la variable respuesta. Para lograr esto, PLS utiliza una técnica de descomposición en componentes principales que se enfoca en encontrar una relación lineal entre las variables predictoras y la variable respuesta.</p>
+<p>La técnica de PLS busca encontrar una representación reducida de los datos de entrada mediante la creación de un conjunto de componentes latentes. Estos componentes latentes son combinaciones lineales de las variables predictoras originales que están altamente correlacionadas con la variable respuesta. Cada componente latente se construye de manera que tenga la máxima covarianza posible con la variable respuesta y, al mismo tiempo, esté altamente correlacionado con las variables predictoras originales.</p>
+<p>La técnica de PLS se utiliza comúnmente en el análisis multivariado de datos, particularmente en la regresión de datos altamente correlacionados o cuando hay muchas variables predictoras en comparación con el número de observaciones disponibles. Además, PLS se puede utilizar para reducir la dimensionalidad de un conjunto de datos para su posterior análisis, así como para identificar las variables predictoras más importantes en un modelo de regresión.</p>
+</section>
+</section>
+<section id="métodos-de-regularización" class="level2">
+<h2 class="anchored" data-anchor-id="métodos-de-regularización">Métodos de regularización</h2>
+<p>La regularización en los métodos de regresión es una técnica utilizada para evitar el sobreajuste o la falta de generalización de un modelo de regresión. El sobreajuste ocurre cuando un modelo se ajusta demasiado bien a los datos de entrenamiento, lo que puede hacer que sea demasiado específico y no se generalice bien a nuevos datos. La regularización es una técnica que impone restricciones al modelo de regresión, con el objetivo de reducir la complejidad y evitar el sobreajuste.</p>
+<p>Existen diferentes tipos de regularización, como la regularización L1 (también conocida como LASSO), la regularización L2 (también conocida como Ridge) y la regularización Elastic Net, que combina ambas técnicas. Estas técnicas agregan una penalización a la función de costo del modelo de regresión, lo que permite controlar la complejidad del modelo y evitar el sobreajuste.</p>
+<p>La regularización es una técnica muy útil en el aprendizaje automático, especialmente en problemas de regresión donde se trabaja con grandes conjuntos de datos y se desea obtener modelos que sean generalizables y no sobreajustados a los datos de entrenamiento.</p>
+<p>La regularización L2 agrega una penalización a la función de costo del modelo de regresión que es proporcional al cuadrado de los coeficientes del modelo. Esta penalización reduce los coeficientes de las características menos relevantes, lo que significa que el modelo se centrará más en las características que son más importantes para la predicción.</p>
+<p>Una vez que se ha entrenado el modelo de regresión con la técnica de regularización L2, es posible utilizar los coeficientes resultantes para identificar las características más importantes. Estas características pueden seleccionarse y utilizarse para entrenar otro modelo, como un modelo de clasificación, por ejemplo.</p>
+<p>Es importante tener en cuenta que la selección de características debe realizarse con cuidado y que no siempre es adecuado utilizar solo las características más importantes para entrenar un modelo, ya que pueden perderse información importante. Por lo tanto, es recomendable realizar un análisis cuidadoso de las características antes de seleccionar las más relevantes.</p>
+<p>Si el modelo de regresión lineal es el siguiente:</p>
+<p><span class="math display">\[
+Y=X\beta+\epsilon
+\]</span></p>
+<p>La regularización L1 o Lasso intenta minimizar la siguiente ecuación</p>
+<p><span class="math display">\[
+\text{min } \frac{1}{2n} \sum_{i=1}^{n}(y_i - \beta_0 - \sum_{j=1}^{p}x_{ij}\beta_j)^2 + \lambda\sum_{j=1}^{p}|\beta_j|
+\]</span></p>
+<p>La regularización L2 o ridge:</p>
+<p><span class="math display">\[
+\text{min } \frac{1}{2n} \sum_{i=1}^{n}(y_i - \beta_0 - \sum_{j=1}^{p}x_{ij}\beta_j)^2 + \lambda\sum_{j=1}^{p}\beta_j^2
+\]</span></p>
+<p>La elastic net:</p>
+<p>$$ <span class="math display">\[\text{min } \frac{1}{2n} \sum_{i=1}^{n}(y_i - \beta_0 - \sum_{j=1}^{p}x_{ij}\beta_j)^2 + \lambda_1\sum_{j=1}^{p}|\beta_j| + \lambda_2\sum_{j=1}^{p}\beta_j^2
+\]</span></p>
+<p>Los métodos de regularización como L1, L2 y Elastic Net no tienen una solución cerrada o analítica, y generalmente se utilizan métodos numéricos iterativos para encontrar los coeficientes óptimos del modelo.</p>
+<p>Estos métodos iterativos se basan en el principio de minimización del error cuadrático (o alguna otra medida de error) del modelo, junto con la función de regularización. Por ejemplo, el algoritmo de descenso de gradiente puede ser utilizado para optimizar la función objetivo de regresión con regularización.</p>
+<p>Además, es importante ajustar el parámetro de regularización <span class="math inline">\(\lambda\)</span> (o <span class="math inline">\(\lambda_1\)</span> y <span class="math inline">\(\lambda_2\)</span> en el caso de Elastic Net) para encontrar un equilibrio adecuado entre el ajuste del modelo y la regularización. Esto se puede hacer mediante la validación cruzada o mediante el uso de algoritmos de optimización más avanzados, como la búsqueda de cuadrícula o la optimización bayesiana.</p>
+<p>En resumen, se utilizan métodos iterativos y de optimización para encontrar la solución óptima en métodos de regularización, lo que hace que su implementación sea más compleja que en los métodos de regresión lineal sin regularización.</p>
+<p>El método de descenso de gradiente es un algoritmo iterativo de optimización utilizado para minimizar una función de costo. En el contexto de los métodos de regresión con regularización, esta función de costo se define como la suma del error cuadrático (o alguna otra medida de error) del modelo, junto con la función de regularización.</p>
+<p>El algoritmo de descenso de gradiente comienza con un valor inicial de los coeficientes del modelo, y en cada iteración actualiza los valores de los coeficientes en la dirección opuesta al gradiente de la función de costo. La idea es que al actualizar los coeficientes en esta dirección, se reducirá gradualmente el valor de la función de costo.</p>
+<p>El tamaño de los pasos que se dan en cada iteración se controla mediante un parámetro conocido como la tasa de aprendizaje. Si la tasa de aprendizaje es demasiado pequeña, el algoritmo puede converger lentamente, mientras que si es demasiado grande, puede no converger en absoluto. Por lo tanto, elegir una tasa de aprendizaje adecuada es importante para el éxito del algoritmo.</p>
+<p>El algoritmo de descenso de gradiente puede repetirse hasta que se alcanza un criterio de convergencia predefinido, como una tolerancia de error o un número máximo de iteraciones. Una vez que se alcanza la convergencia, se devuelve el valor óptimo de los coeficientes del modelo.</p>
+</section>
+</section>
+<section id="métricas" class="level1">
+<h1>Métricas</h1>
+<p>Existen varias métricas que se utilizan comúnmente para evaluar la rendición de los modelos, dependiendo del tipo de problema y del tipo de modelo utilizado. Aquí te presento algunas de las métricas más comunes:</p>
+<ul>
+<li><p>Error cuadrático medio (MSE): Esta métrica mide la media de los errores al cuadrado entre las predicciones del modelo y los valores reales de la variable respuesta. El MSE es muy utilizado en problemas de regresión.</p></li>
+<li><p>Coeficiente de determinación (R^2): Esta métrica mide la proporción de la variabilidad en la variable respuesta que es explicada por el modelo. Un valor de R^2 cercano a 1 indica que el modelo explica bien la variabilidad en la variable respuesta, mientras que un valor cercano a 0 indica que el modelo no es capaz de explicar la variabilidad. El R^2 es muy utilizado en problemas de regresión.</p></li>
+<li><p>Exactitud (accuracy): Esta métrica mide la proporción de predicciones correctas del modelo en relación al total de predicciones. El accuracy es muy utilizado en problemas de clasificación.</p></li>
+<li><p>Precisión (precision) y recuperación (recall): Estas métricas se utilizan comúnmente en problemas de clasificación binaria para evaluar la calidad de las predicciones positivas del modelo. La precisión mide la proporción de predicciones positivas correctas en relación al total de predicciones positivas, mientras que la recuperación mide la proporción de instancias positivas que son correctamente clasificadas por el modelo.</p></li>
+<li><p>F1-score: Esta métrica combina la precisión y la recuperación en una única medida que se utiliza comúnmente en problemas de clasificación binaria.</p></li>
+</ul>
+<p>Cabe destacar que no hay una métrica única que sea la más utilizada para evaluar la rendición de los modelos, ya que la elección de la métrica depende del tipo de problema y del tipo de modelo utilizado. En general, se recomienda utilizar varias métricas para evaluar la rendición de los modelos y obtener una visión más completa del desempeño del modelo.</p>
+<p><span class="math display">\[
+\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+\]</span></p>
+<p><span class="math display">\[
+R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}i)^2}{\sum{i=1}^{n} (y_i - \bar{y})^2}
+\]</span></p>
+</section>
+<section id="práctica" class="level1">
+<h1>Práctica</h1>
+<p><strong>De los datos <code>fat</code> del paquete <code>faraway</code>,utiliza el porcentaje de grasa,<code>siri</code>, como la respuesta, y las otras variables como independientes, excepto <code>brozek</code> y <code>density</code>. Quita una observación cada 10 del conjunto de datos para formar el conjunto de entrenamiento y el de prueba.</strong></p>
+<p><strong>Realiza los siguientes modelos:</strong></p>
+<ol type="1">
+<li><strong>Regresión múltiple lineal</strong></li>
+<li><strong>Regresión múlitple seleccionando variables con AIC</strong></li>
+<li><strong>PCR</strong></li>
+<li><strong>PLS</strong></li>
+<li><strong>Ridge</strong></li>
+<li><strong>LASSO</strong></li>
+</ol>
+<section id="cargamos-librerías-y-carga-de-datos" class="level3">
+<h3 class="anchored" data-anchor-id="cargamos-librerías-y-carga-de-datos">Cargamos librerías y carga de datos</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(faraway)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggstatsplot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>You can cite this package as:
+     Patil, I. (2021). Visualizations with statistical details: The 'ggstatsplot' approach.
+     Journal of Open Source Software, 6(61), 3167, doi:10.21105/joss.03167</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DescTools)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>corrplot 0.92 loaded</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(leaps)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pls)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'pls'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:corrplot':
+
+    corrplot</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:stats':
+
+    loadings</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glmnet)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: Matrix</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loaded glmnet 4.1-7</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>datos <span class="ot">&lt;-</span> fat</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(fat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   252 obs. of  18 variables:
+ $ brozek : num  12.6 6.9 24.6 10.9 27.8 20.6 19 12.8 5.1 12 ...
+ $ siri   : num  12.3 6.1 25.3 10.4 28.7 20.9 19.2 12.4 4.1 11.7 ...
+ $ density: num  1.07 1.09 1.04 1.08 1.03 ...
+ $ age    : int  23 22 22 26 24 24 26 25 25 23 ...
+ $ weight : num  154 173 154 185 184 ...
+ $ height : num  67.8 72.2 66.2 72.2 71.2 ...
+ $ adipos : num  23.7 23.4 24.7 24.9 25.6 26.5 26.2 23.6 24.6 25.8 ...
+ $ free   : num  135 161 116 165 133 ...
+ $ neck   : num  36.2 38.5 34 37.4 34.4 39 36.4 37.8 38.1 42.1 ...
+ $ chest  : num  93.1 93.6 95.8 101.8 97.3 ...
+ $ abdom  : num  85.2 83 87.9 86.4 100 94.4 90.7 88.5 82.5 88.6 ...
+ $ hip    : num  94.5 98.7 99.2 101.2 101.9 ...
+ $ thigh  : num  59 58.7 59.6 60.1 63.2 66 58.4 60 62.9 63.1 ...
+ $ knee   : num  37.3 37.3 38.9 37.3 42.2 42 38.3 39.4 38.3 41.7 ...
+ $ ankle  : num  21.9 23.4 24 22.8 24 25.6 22.9 23.2 23.8 25 ...
+ $ biceps : num  32 30.5 28.8 32.4 32.2 35.7 31.9 30.5 35.9 35.6 ...
+ $ forearm: num  27.4 28.9 25.2 29.4 27.7 30.6 27.8 29 31.1 30 ...
+ $ wrist  : num  17.1 18.2 16.6 18.2 17.7 18.8 17.7 18.8 18.2 19.2 ...</code></pre>
+</div>
+</div>
+</section>
+<section id="estadística-descriptiva-e-inferencial" class="level3">
+<h3 class="anchored" data-anchor-id="estadística-descriptiva-e-inferencial">Estadística descriptiva e inferencial</h3>
+<p>Nos dice el enunciado que tenemos que quitar <code>brozek</code> y <code>density</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> datos[,<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>El conjunto de datos lo constan 252 observaciones y 18 variables. Todas las variables son numéricas</p>
+<p>Realizamos pruebas de Jarque Bera para ver la normalidad de los datos</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">apply</span>(X,<span class="dv">2</span>,<span class="cf">function</span>(x) <span class="fu">JarqueBeraTest</span>(x)<span class="sc">$</span>p.value)<span class="sc">&lt;</span><span class="fl">0.05</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 11</code></pre>
+</div>
+</div>
+<p>De las 16 variables, 11 no tienen normalidad.</p>
+<p>Procedemos a realizar la correlación entre las variables.</p>
+<p>Cómo tenemos variables que no siguen la normalidad tendríamos que hacer una prueba de <strong>spearman</strong>, pero como son bastantes observaciones la de <strong>pearson</strong> es más robusta</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>correlacion <span class="ot">&lt;-</span> <span class="fu">cor</span>(X,<span class="at">method =</span> <span class="st">"pearson"</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>corrplot<span class="sc">::</span><span class="fu">corrplot</span>(correlacion)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Regularizacion_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Podemos observar, como muchas de las variables estan íntimamente correlacionadas, por lo tanto, a priori ya sabemos que nuestros modelos múltiples lineales simples, no serán buenos.</p>
+<p>Antes de empezar necesitamos escalar los datos</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">scale</span>(X))<span class="do">##para cada observación le va a quita la media para cada columna y la va a dividir entre la relación estandar de cada columna </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="partición-de-datos-prueba-y-entrenamiento" class="level3">
+<h3 class="anchored" data-anchor-id="partición-de-datos-prueba-y-entrenamiento">Partición de datos prueba y entrenamiento</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>train <span class="ot">&lt;-</span> X[<span class="sc">-</span><span class="fu">seq</span>(<span class="dv">10</span>,<span class="dv">252</span>,<span class="dv">10</span>),]</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> X[<span class="fu">seq</span>(<span class="dv">10</span>,<span class="dv">252</span>,<span class="dv">10</span>),]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="regresión-lineal-múltiple" class="level3">
+<h3 class="anchored" data-anchor-id="regresión-lineal-múltiple">Regresión lineal múltiple</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>g  <span class="ot">&lt;-</span> <span class="fu">lm</span>(siri <span class="sc">~</span>.,<span class="at">data=</span>train)<span class="do">##Q1 es el 25% de los datos-Q2 es el 75% de los datos </span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(g)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = siri ~ ., data = train)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.69681 -0.08032  0.02185  0.10933  0.79604 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -0.005917   0.012328  -0.480 0.631736    
+age          0.012014   0.018553   0.648 0.517983    
+weight       1.274772   0.081873  15.570  &lt; 2e-16 ***
+height       0.021458   0.017645   1.216 0.225315    
+adipos      -0.224077   0.049727  -4.506 1.09e-05 ***
+free        -1.230381   0.032435 -37.933  &lt; 2e-16 ***
+neck         0.004800   0.026103   0.184 0.854272    
+chest        0.121106   0.039882   3.037 0.002694 ** 
+abdom        0.180529   0.054356   3.321 0.001056 ** 
+hip          0.005305   0.048026   0.110 0.912148    
+thigh        0.122365   0.034165   3.582 0.000424 ***
+knee         0.030732   0.026956   1.140 0.255542    
+ankle        0.025340   0.016466   1.539 0.125325    
+biceps       0.034730   0.023342   1.488 0.138278    
+forearm      0.055722   0.017707   3.147 0.001888 ** 
+wrist        0.015537   0.023070   0.673 0.501378    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.1852 on 211 degrees of freedom
+Multiple R-squared:  0.9692,    Adjusted R-squared:  0.967 
+F-statistic: 442.5 on 15 and 211 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>Observamos, cómo 7 variables son las más importantes en el modelo. De hecho tenemos un R2 de casi el 97 porciento</p>
+<section id="predicción" class="level4">
+<h4 class="anchored" data-anchor-id="predicción">Predicción</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>predlm  <span class="ot">&lt;-</span> <span class="fu">predict</span>(g,test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="regresión-lineal-múltiple.-selección-aic" class="level3">
+<h3 class="anchored" data-anchor-id="regresión-lineal-múltiple.-selección-aic">Regresión lineal múltiple. Selección AIC</h3>
+<p>Lo podemos plantear manualmente</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a> conj <span class="ot">&lt;-</span> <span class="fu">regsubsets</span>(siri <span class="sc">~</span>., <span class="at">data=</span>train, <span class="at">nvmax =</span> <span class="dv">15</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a> rconj <span class="ot">&lt;-</span> <span class="fu">summary</span>(conj)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a> n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(train)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a> p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(train[,<span class="sc">-</span><span class="dv">1</span>]) <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a> aic <span class="ot">&lt;-</span> n<span class="sc">*</span><span class="fu">log</span>(rconj<span class="sc">$</span>rss<span class="sc">/</span>n)<span class="sc">+</span>(<span class="dv">2</span><span class="sc">:</span>p)<span class="sc">*</span><span class="dv">2</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a> <span class="fu">plot</span>(<span class="dv">1</span><span class="sc">:</span>(p<span class="dv">-1</span>),aic,<span class="at">ylab=</span><span class="st">"AIC"</span>,<span class="at">xlab=</span><span class="st">"Número de predictores"</span>,<span class="at">axes=</span>F)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a> <span class="fu">box</span>(); <span class="fu">axis</span>(<span class="dv">1</span>,<span class="at">at=</span><span class="dv">1</span><span class="sc">:</span>(p<span class="dv">-1</span>)); <span class="fu">axis</span>(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Regularizacion_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>El mínimo AIC se obtiene con</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which.min</span>(aic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 10</code></pre>
+</div>
+</div>
+<p>pero con 7, 8 o 9 predictoras, el valor de AIC es similar.</p>
+<p>Si se utiliza la función <code>step()</code>, se minimiza el AIC con un modelo de 10 predictores</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>lmaic <span class="ot">&lt;-</span> <span class="fu">step</span>(g, <span class="at">trace =</span> F)<span class="do">##step hace cada combinación posible de las variables hasta que tenga el mejor modelo </span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">formula</span>(lmaic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>siri ~ weight + adipos + free + chest + abdom + thigh + knee + 
+    ankle + biceps + forearm</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>predaic <span class="ot">&lt;-</span> <span class="fu">predict</span>(lmaic,test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="pcr" class="level3">
+<h3 class="anchored" data-anchor-id="pcr">PCR</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>mpc <span class="ot">&lt;-</span> <span class="fu">pcr</span>(siri <span class="sc">~</span>., <span class="at">data=</span>train, <span class="at">validation=</span><span class="st">"CV"</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>mpcCV <span class="ot">&lt;-</span> <span class="fu">RMSEP</span>(mpc, <span class="at">estimate=</span><span class="st">"CV"</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>(numpredcp <span class="ot">&lt;-</span> <span class="fu">which.min</span>(mpcCV<span class="sc">$</span>val))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 14</code></pre>
+</div>
+</div>
+<p>En este caso el número de predictores seleccionados es de 7 (descontando el intercept).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>predcp <span class="ot">&lt;-</span> <span class="fu">predict</span>(mpc, test, <span class="at">ncomp=</span>numpredcp<span class="dv">-1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="regresion-por-mínimos-cuadrados-parciales-pls" class="level3">
+<h3 class="anchored" data-anchor-id="regresion-por-mínimos-cuadrados-parciales-pls">Regresion por mínimos cuadrados parciales (PLS)</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>mpls <span class="ot">&lt;-</span> <span class="fu">plsr</span>(siri<span class="sc">~</span>., <span class="at">data=</span>train, <span class="at">validation=</span><span class="st">"CV"</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>mplsCV <span class="ot">&lt;-</span> <span class="fu">RMSEP</span>(mpls, <span class="at">estimate=</span><span class="st">"CV"</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>(numpredpls<span class="ot">&lt;-</span><span class="fu">which.min</span>(mplsCV<span class="sc">$</span>val) <span class="sc">-</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>predpls <span class="ot">&lt;-</span> <span class="fu">predict</span>(mpls,test,<span class="at">ncomp=</span>numpredpls)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="regresión-contraída-ridge" class="level3">
+<h3 class="anchored" data-anchor-id="regresión-contraída-ridge">Regresión contraída (RIDGE)</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>mr <span class="ot">&lt;-</span> <span class="fu">lm.ridge</span>(siri <span class="sc">~</span>., <span class="at">data=</span>datos, <span class="at">lambda=</span>(<span class="fu">seq</span>(<span class="dv">0</span>,<span class="fl">0.01</span>,<span class="fl">0.0001</span>)))</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>(nGCV <span class="ot">&lt;-</span> <span class="fu">which.min</span>(mr<span class="sc">$</span>GCV))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>0.0024 
+    25 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">124568919</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>lGCV <span class="ot">&lt;-</span> mr<span class="sc">$</span>lambda[nGCV]</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(mr<span class="sc">$</span>lambda,<span class="fu">coef</span>(mr),<span class="at">type=</span><span class="st">"l"</span>, <span class="at">ylim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>,<span class="dv">2</span>),                 <span class="at">xlab=</span><span class="fu">expression</span>(lambda),<span class="at">ylab=</span><span class="fu">expression</span>(hatbeta[i]))</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span>lGCV,<span class="at">col=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Regularizacion_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mr<span class="sc">$</span>lambda,mr<span class="sc">$</span>GCV,<span class="at">type=</span><span class="st">"l"</span>,<span class="at">xlab=</span><span class="fu">expression</span>(lambda),<span class="at">ylab=</span><span class="st">"GCV"</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span>lGCV,<span class="at">col=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Regularizacion_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a> mr <span class="ot">&lt;-</span> <span class="fu">lm.ridge</span>(siri<span class="sc">~</span>.,train, <span class="at">lambda=</span>lGCV)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a> predridge <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>,<span class="fu">as.matrix</span>(test[,<span class="sc">-</span><span class="dv">1</span>])) <span class="sc">%*%</span> <span class="fu">coef</span>(mr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="regresión-lasso" class="level3">
+<h3 class="anchored" data-anchor-id="regresión-lasso">Regresión LASSO</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co">#perform k-fold cross-validation to find optimal lambda value</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>train.matrix <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(train)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> train.matrix[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> train.matrix[,<span class="dv">1</span>]</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>mod_cv <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(<span class="at">x=</span>X, <span class="at">y=</span>y, <span class="at">family=</span><span class="st">"gaussian"</span>,</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>                        <span class="at">intercept =</span> F, <span class="at">alpha=</span><span class="dv">1</span>)</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="co">#find optimal lambda value that minimizes test MSE</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>best_lambda <span class="ot">&lt;-</span> mod_cv<span class="sc">$</span>lambda.min</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>best_lambda</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.01666548</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co">#produce plot of test MSE by lambda value</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mod_cv) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Regularizacion_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>test.matrix <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(test)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>predlasso <span class="ot">&lt;-</span> <span class="fu">predict</span>(mod_cv,test.matrix[,<span class="sc">-</span><span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="resumen" class="level2">
+<h2 class="anchored" data-anchor-id="resumen">Resumen</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a> rmse <span class="ot">&lt;-</span> <span class="cf">function</span>(x,y) <span class="fu">sqrt</span>(<span class="fu">mean</span>((x<span class="sc">-</span>y)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a> rmse.lm <span class="ot">&lt;-</span> <span class="fu">rmse</span>(predlm,test<span class="sc">$</span>siri)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a> rmse.aic <span class="ot">&lt;-</span> <span class="fu">rmse</span>(predaic,test<span class="sc">$</span>siri)</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a> rmse.cp <span class="ot">&lt;-</span> <span class="fu">rmse</span>(predcp,test<span class="sc">$</span>siri)</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a> rmse.pls <span class="ot">&lt;-</span> <span class="fu">rmse</span>(predpls,test<span class="sc">$</span>siri)</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a> rmse.ridge <span class="ot">&lt;-</span> <span class="fu">rmse</span>(predridge,test<span class="sc">$</span>siri)</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a> rmse.lasso <span class="ot">&lt;-</span> <span class="fu">rmse</span>(predlasso,test<span class="sc">$</span>siri)</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a> res <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">lm=</span>rmse.lm,</span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">aic=</span>rmse.aic,</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">pcr =</span> rmse.cp,</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">pls =</span> rmse.pls,</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">ridge=</span>rmse.ridge,</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">lasso=</span>rmse.lasso)</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a> res <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">t</span>(<span class="fu">round</span>(res,<span class="dv">4</span>)))</span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>res</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          V1
+lm    0.1352
+aic   0.1341
+pcr   0.2254
+pls   0.2012
+ridge 0.1352
+lasso 0.2015</code></pre>
+</div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
